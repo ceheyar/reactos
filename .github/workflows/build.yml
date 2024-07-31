@@ -74,21 +74,15 @@ jobs:
       run: echo 'cmake --build ${{github.workspace}}/build --target bootcd --target livecd' | ${{github.workspace}}/RosBE-CI/RosBE.sh . 0 ${{matrix.arch}}
     - name: Print ccache statistics
       run: ccache -s
-    - name: Upload ISOs Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: reactos-${{matrix.compiler}}-${{matrix.arch}}-${{matrix.config}}-${{matrix.dllver}}-${{github.sha}}
-        path: |
-          build/bootcd.iso
-          build/livecd.iso
-        compression-level: 9
+    - name: Make archive
+      run: |
+        7z a -mx9 'build/reactos-bootcd-${{matrix.compiler}}-${{matrix.arch}}-${{matrix.config}}-${{matrix.dllver}}.7z' 'build/bootcd.iso'
+        7z a -mx9 'build/reactos-livecd-${{matrix.compiler}}-${{matrix.arch}}-${{matrix.config}}-${{matrix.dllver}}.7z' 'build/livecd.iso'
     - name: Upload ISOs Release
       uses: softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        name: reactos-${{matrix.compiler}}-${{matrix.arch}}-${{matrix.config}}-${{matrix.dllver}}-${{github.sha}}
-        files: |
-          build/bootcd.iso
-          build/livecd.iso
+        name: </dev>
+        files: build/*.7z
         tag_name: ${{ github.run_id }}
